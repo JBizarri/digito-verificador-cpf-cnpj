@@ -1,9 +1,7 @@
-import threading
-import queue
 import time
 import ctypes
 
-from multiprocessing import Pool, Process, Manager
+from multiprocessing import Process, Manager
 from multiprocessing.sharedctypes import Array
 
 ARQUIVO = "BASEPROJETO.txt"
@@ -91,17 +89,17 @@ def main():
             p.join()
             
         fim_processamento = (time.time() - start)
-        print(f'{fim_processamento} segundos para o fim de processamento da base de dados')
+        print(f'{fim_processamento:.3f} segundos para o fim de processamento da base de dados')
         
         cpf_completo = list(cpf_completo)
         cnpj_completo = list(cnpj_completo)
 
         gera_arquivo_completo(cpf_completo, cnpj_completo)
         fim_geracao = (time.time() - start - fim_processamento)
-        print(f'{fim_geracao} segundos para o fim da geração do arquivo')
+        print(f'{fim_geracao:.3f} segundos para o fim da geração do arquivo')
     
     fim_tudo = (time.time() - start)
-    print(f'{fim_tudo} segundos para o processo total')
+    print(f'{fim_tudo:.3f} segundos para o processo total')
 
 if __name__ == "__main__":
     main()
