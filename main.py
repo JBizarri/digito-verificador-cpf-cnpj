@@ -11,7 +11,7 @@ PESOS_CPF_SEGUNDO_DIGITO = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2]
 PESOS_CNPJ_PRIMEIRO_DIGITO = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
 PESOS_CNPJ_SEGUNDO_DIGITO = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
 
-NUM_THREADS = 4
+NUM_PROCESSOS = 4
 
 def processa_cpf_cnpj(dado, primeiro_peso, segundo_peso):
     soma_primeiro_digito = 0
@@ -39,7 +39,7 @@ def processa_cpf_cnpj(dado, primeiro_peso, segundo_peso):
 
 
 def processa_dado(dados, thread_number, cpf_completo, cnpj_completo):
-    slice_por_thread = int(len(dados)/NUM_THREADS)
+    slice_por_thread = int(len(dados)/NUM_PROCESSOS)
     inicio = int(thread_number * slice_por_thread)
     for dado in dados[inicio:inicio + slice_por_thread]:
         if len(dado) == 9:
@@ -63,7 +63,7 @@ def get_conteudo_arquivo():
 
 
 def gera_arquivo_completo(cpf_completo, cnpj_completo):
-    with open('output.txt', 'a') as arq:
+    with open('output.txt', 'w') as arq:
         for cpf in cpf_completo:
             arq.write(f'{cpf}\n')
             
@@ -73,15 +73,17 @@ def gera_arquivo_completo(cpf_completo, cnpj_completo):
 
 def main():  
     start = time.time()
-    
+    print("********* Inicia o processo *********")
+    print("Coletando dados do arquivo de texto")
     dados = get_conteudo_arquivo()
     
+    print("Iniciando calculo dos digitos verificadores")
     with Manager() as manager:
         cpf_completo = manager.list()
         cnpj_completo = manager.list()
 
         processes = []
-        for i in range(NUM_THREADS):
+        for i in range(NUM_PROCESSOS):
             p = Process(target=processa_dado, args=(dados, i, cpf_completo, cnpj_completo))  # Passing the list
             p.start()
             processes.append(p)
@@ -89,17 +91,19 @@ def main():
             p.join()
             
         fim_processamento = (time.time() - start)
-        print(f'{fim_processamento:.3f} segundos para o fim de processamento da base de dados')
+        print(f'Tempo cálculo da base de dados: {fim_processamento:.3f} segundos')
         
         cpf_completo = list(cpf_completo)
         cnpj_completo = list(cnpj_completo)
 
-        gera_arquivo_completo(cpf_completo, cnpj_completo)
-        fim_geracao = (time.time() - start - fim_processamento)
-        print(f'{fim_geracao:.3f} segundos para o fim da geração do arquivo')
+    print("Iniciando geração do arquivo final")
+    gera_arquivo_completo(cpf_completo, cnpj_completo)
+    fim_geracao = (time.time() - start - fim_processamento)
+    print(f'Tempo geração do arquivo: {fim_geracao:.3f} segundos')
     
     fim_tudo = (time.time() - start)
-    print(f'{fim_tudo:.3f} segundos para o processo total')
+    print("********* Fim do processo *********")
+    print(f'Tempo de execução total: {fim_tudo:.3f} segundos')
 
 if __name__ == "__main__":
     main()

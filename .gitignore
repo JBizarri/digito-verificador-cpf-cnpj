@@ -142,3 +142,7 @@ cython_debug/
 
 #Output File
 output.txt
+
+#Zips
+
+*.zip
