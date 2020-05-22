@@ -14,6 +14,16 @@ PESOS_CNPJ_SEGUNDO_DIGITO = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
 NUM_PROCESSOS = 4
 
 def processa_cpf_cnpj(dado, primeiro_peso, segundo_peso):
+    """Calcula o digito verificador do CPF ou CNPJ
+
+    Arguments:
+        dado {str} -- [O CPF/CNPJ sem o digito verificador]
+        primeiro_peso {list} -- O peso de cada algarismo para o CPF/CNPJ sem digito verificador
+        segundo_peso {list} -- O peso de cada algarismo para o CPF/CNPJ com o primeiro digito verificador calculado
+
+    Returns:
+        str -- CPF/CNPJ completo
+    """
     soma_primeiro_digito = 0
     for algarismo, peso in zip(dado, primeiro_peso):
         soma_primeiro_digito += int(algarismo) * peso
@@ -39,6 +49,15 @@ def processa_cpf_cnpj(dado, primeiro_peso, segundo_peso):
 
 
 def processa_dado(dados, thread_number, cpf_completo, cnpj_completo):
+    """Decide qual pedaço da lista cada thread irá pegar e define onde o dado sera armazenado, 
+    CPFs vão para lista de CPF e CNPJs para a lista de CNPJs
+
+    Arguments:
+        dados {list} -- Lista com todos os dados
+        thread_number {int} -- O numero do processo, para definir qual pedaço da lista ele pegará
+        cpf_completo {list} -- Lista para armazenar o CPF
+        cnpj_completo {type} -- Lista para armazenar o CNPJ
+    """    
     slice_por_thread = int(len(dados)/NUM_PROCESSOS)
     inicio = int(thread_number * slice_por_thread)
     for dado in dados[inicio:inicio + slice_por_thread]:
@@ -55,6 +74,11 @@ def processa_dado(dados, thread_number, cpf_completo, cnpj_completo):
 
 
 def get_conteudo_arquivo():
+    """Lê todas as linhas da base de dados e retorna uma lista com cada linha
+
+    Returns:
+        list -- Cada linha da base de dados é um elemento da lista
+    """    
     with open(ARQUIVO, 'r') as arq:
         cadastros_pessoas = [line.strip(' ').strip('\n')
                              for line in arq.readlines()]
@@ -63,6 +87,12 @@ def get_conteudo_arquivo():
 
 
 def gera_arquivo_completo(cpf_completo, cnpj_completo):
+    """Gera um output com todos os CPFs e todos CNPJs nessa respectiva ordem
+
+    Arguments:
+        cpf_completo {list} -- Lista com todos CPFs para escrever
+        cnpj_completo {list} -- Lista com todos CNPJs para escrever
+    """    
     with open('output.txt', 'w') as arq:
         for cpf in cpf_completo:
             arq.write(f'{cpf}\n')
